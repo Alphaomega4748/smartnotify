@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SmartNotify — Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:#0F172A;color:#E2E8F0;min-height:100vh;}
+  .nav{background:#1E293B;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .logo{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;background:linear-gradient(135deg,#6366F1,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .nav-right{display:flex;align-items:center;gap:12px;}
+  .api-badge{background:rgba(99,102,241,0.15);color:#818CF8;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;font-family:monospace;}
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px;}
+  .page-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;margin-bottom:6px;}
+  .page-sub{color:#64748B;font-size:14px;margin-bottom:28px;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .stat{background:#1E293B;border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,0.05);}
+  .stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;margin-bottom:4px;}
+  .stat-label{font-size:12px;color:#64748B;font-weight:500;}
+  .green{color:#10B981;} .red{color:#EF4444;} .blue{color:#6366F1;} .cyan{color:#06B6D4;} .amber{color:#F59E0B;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+  .card{background:#1E293B;border-radius:14px;border:1px solid rgba(255,255,255,0.05);overflow:hidden;}
+  .card-header{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;}
+  .card-title{font-size:15px;font-weight:600;}
+  .card-body{padding:16px 20px;}
+  .btn{padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+  .btn-primary{background:#6366F1;color:white;}
+  .btn-primary:hover{background:#4F46E5;}
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  .input{background:#0F172A;border:1.5px solid rgba(255,255,255,0.08);border-radius:9px;padding:10px 14px;font-size:13px;color:#E2E8F0;font-family:'Inter',sans-serif;width:100%;outline:none;}
+  .input:focus{border-color:#6366F1;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .form-label{font-size:12px;font-weight:600;color:#64748B;margin-bottom:6px;display:block;}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;}
+  .badge-green{background:rgba(16,185,129,0.15);color:#10B981;}
+  .badge-red{background:rgba(239,68,68,0.15);color:#EF4444;}
+  .badge-amber{background:rgba(245,158,11,0.15);color:#F59E0B;}
+  .badge-blue{background:rgba(99,102,241,0.15);color:#818CF8;}
+  .log-item{padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center;}
+  .log-item:last-child{border-bottom:none;}
+  .log-event{font-size:13px;font-weight:500;}
+  .log-time{font-size:11px;color:#475569;}
+  .log-meta{font-size:12px;color:#64748B;margin-top:2px;}
+  .alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;}
+  .alert-success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#10B981;}
+  .alert-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#EF4444;}
+  .empty{text-align:center;padding:32px;color:#475569;}
+  .secret-box{background:#0F172A;border:1.5px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px 16px;font-family:monospace;font-size:13px;color:#F59E0B;word-break:break-all;margin-top:10px;}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;}
+  .tab{padding:8px 18px;border-radius:9px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;background:transparent;color:#64748B;transition:all 0.15s;}
+  .tab.active{background:#6366F1;color:white;}
+  .progress{height:6px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-top:10px;}
+  .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#6366F1,#06B6D4);transition:width 0.5s;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="logo">⚡ SmartNotify</div>
+  <div class="nav-right">
+    <span id="apiKeyDisplay" class="api-badge">Login to see API key</span>
+    <button class="btn btn-primary btn-sm" onclick="showSection('auth')">Login</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- AUTH SECTION -->
+  <div id="authSection">
+    <div class="page-title">Welcome to SmartNotify</div>
+    <div class="page-sub">Webhook & Notification Delivery Engine</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Login</button>
+      <button class="tab" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <div id="authLogin" style="max-width:420px;">
+      <div id="loginAlert" class="alert"></div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Email</label>
+        <input class="input" id="loginEmail" placeholder="you@example.com" />
+      </div>
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Password</label>
+        <input class="input" id="loginPass" type="password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Sign In →</button>
+    </div>
+
+    <div id="authRegister" style="max-width:420px;display:none;">
+      <div id="regAlert" class="alert"></div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Name</label>
+        <input class="input" id="regName" placeholder="Akash Kumar Das" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Email</label>
+        <input class="input" id="regEmail" placeholder="you@example.com" />
+      </div>
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Password</label>
+        <input class="input" id="regPass" type="password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Create Account →</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD SECTION -->
+  <div id="dashSection" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Real-time delivery metrics</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="loadDashboard()">⟳ Refresh</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-val blue" id="statWebhooks">—</div><div class="stat-label">Webhooks Registered</div></div>
+      <div class="stat"><div class="stat-val green" id="statDelivered">—</div><div class="stat-label">Delivered</div></div>
+      <div class="stat"><div class="stat-val red" id="statFailed">—</div><div class="stat-label">Failed</div></div>
+      <div class="stat">
+        <div class="stat-val cyan" id="statRate">—</div>
+        <div class="stat-label">Success Rate</div>
+        <div class="progress"><div class="progress-fill" id="rateFill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Register Webhook -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Register Webhook</span></div>
+        <div class="card-body">
+          <div id="whAlert" class="alert"></div>
+          <div style="margin-bottom:12px;">
+            <label class="form-label">Webhook Name</label>
+            <input class="input" id="whName" placeholder="My App Webhook" />
+          </div>
+          <div style="margin-bottom:12px;">
+            <label class="form-label">Target URL</label>
+            <input class="input" id="whUrl" placeholder="https://your-app.com/webhook" />
+          </div>
+          <div style="margin-bottom:16px;">
+            <label class="form-label">Events (comma separated, * for all)</label>
+            <input class="input" id="whEvents" value="*" placeholder="user.created, order.paid" />
+          </div>
+          <button class="btn btn-primary" onclick="createWebhook()">Register →</button>
+          <div id="secretBox" style="display:none;">
+            <div style="color:#F59E0B;font-size:12px;font-weight:600;margin-top:14px;">⚠️ Save this secret — shown only once!</div>
+            <div class="secret-box" id="secretVal"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trigger Event -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Trigger Event</span></div>
+        <div class="card-body">
+          <div id="evAlert" class="alert"></div>
+          <div style="margin-bottom:12px;">
+            <label class="form-label">Event Type</label>
+            <select class="input" id="evType">
+              <option value="user.created">user.created</option>
+              <option value="order.paid">order.paid</option>
+              <option value="payment.failed">payment.failed</option>
+              <option value="subscription.cancelled">subscription.cancelled</option>
+              <option value="booking.confirmed">booking.confirmed</option>
+            </select>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label class="form-label">Payload (JSON)</label>
+            <textarea class="input" id="evPayload" rows="4" style="resize:none;font-family:monospace;">{"userId": "123", "name": "Akash", "email": "akash@demo.com"}</textarea>
+          </div>
+          <button class="btn btn-primary" onclick="triggerEvent()">Fire Event ⚡</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Logs -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Recent Delivery Logs</span>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.06);color:#94A3B8;" onclick="loadNotifications()">Refresh</button>
+      </div>
+      <div class="card-body" id="notifLogs">
+        <div class="empty">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('sn_token') || '';
+let apiKey = localStorage.getItem('sn_apikey') || '';
+
+function headers() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+}
+
+function showAlert(id, msg, type='error') {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `alert alert-${type}`;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('authLogin').style.display    = tab === 'login'    ? 'block' : 'none';
+  document.getElementById('authRegister').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const pass  = document.getElementById('loginPass').value;
+  try {
+    const r = await fetch(`${API}/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password: pass }) });
+    const d = await r.json();
+    if (!d.success) return showAlert('loginAlert', d.message);
+    token  = d.token;
+    apiKey = d.apiKey;
+    localStorage.setItem('sn_token', token);
+    localStorage.setItem('sn_apikey', apiKey);
+    document.getElementById('apiKeyDisplay').textContent = apiKey.slice(0, 20) + '...';
+    document.getElementById('authSection').style.display  = 'none';
+    document.getElementById('dashSection').style.display  = 'block';
+    loadDashboard();
+    loadNotifications();
+  } catch { showAlert('loginAlert', 'Connection failed — is the server running?'); }
+}
+
+async function doRegister() {
+  const name  = document.getElementById('regName').value;
+  const email = document.getElementById('regEmail').value;
+  const pass  = document.getElementById('regPass').value;
+  try {
+    const r = await fetch(`${API}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, email, password: pass }) });
+    const d = await r.json();
+    if (!d.success) return showAlert('regAlert', d.message);
+    showAlert('regAlert', 'Account created! Please login.', 'success');
+    switchTab('login');
+  } catch { showAlert('regAlert', 'Connection failed'); }
+}
+
+async function loadDashboard() {
+  try {
+    const r = await fetch(`${API}/dashboard`, { headers: headers() });
+    const d = await r.json();
+    if (!d.success) return;
+    const s = d.stats;
+    document.getElementById('statWebhooks').textContent  = s.webhookCount;
+    document.getElementById('statDelivered').textContent = s.delivered;
+    document.getElementById('statFailed').textContent    = s.failed;
+    document.getElementById('statRate').textContent      = s.successRate;
+    document.getElementById('rateFill').style.width      = s.successRate;
+  } catch {}
+}
+
+async function createWebhook() {
+  const name      = document.getElementById('whName').value;
+  const targetUrl = document.getElementById('whUrl').value;
+  const eventsRaw = document.getElementById('whEvents').value;
+  const events    = eventsRaw.split(',').map(e => e.trim()).filter(Boolean);
+
+  if (!name || !targetUrl) return showAlert('whAlert', 'Name and URL required');
+  try {
+    const r = await fetch(`${API}/webhooks`, { method:'POST', headers: headers(), body: JSON.stringify({ name, targetUrl, events }) });
+    const d = await r.json();
+    if (!d.success) return showAlert('whAlert', d.message);
+    showAlert('whAlert', '✅ Webhook registered!', 'success');
+    document.getElementById('secretVal').textContent = d.webhook.secret;
+    document.getElementById('secretBox').style.display = 'block';
+    loadDashboard();
+  } catch { showAlert('whAlert', 'Failed — check server'); }
+}
+
+async function triggerEvent() {
+  const eventType = document.getElementById('evType').value;
+  let payload = {};
+  try { payload = JSON.parse(document.getElementById('evPayload').value); }
+  catch { return showAlert('evAlert', 'Invalid JSON payload'); }
+
+  try {
+    const r = await fetch(`${API}/events`, { method:'POST', headers: headers(), body: JSON.stringify({ eventType, payload }) });
+    const d = await r.json();
+    if (!d.success) return showAlert('evAlert', d.message);
+    showAlert('evAlert', `⚡ Event queued! ID: ${d.eventId}`, 'success');
+    setTimeout(() => { loadDashboard(); loadNotifications(); }, 2000);
+  } catch { showAlert('evAlert', 'Failed'); }
+}
+
+async function loadNotifications() {
+  try {
+    const r = await fetch(`${API}/notifications?limit=10`, { headers: headers() });
+    const d = await r.json();
+    const box = document.getElementById('notifLogs');
+    if (!d.success || d.notifications.length === 0) {
+      box.innerHTML = '<div class="empty">No delivery logs yet. Register a webhook and trigger an event!</div>';
+      return;
+    }
+    box.innerHTML = d.notifications.map(n => `
+      <div class="log-item">
+        <div>
+          <div class="log-event">${n.event?.eventType || 'unknown'} → ${n.targetUrl}</div>
+          <div class="log-meta">Attempts: ${n.attempts} &nbsp;•&nbsp; ${n.statusCode ? 'HTTP ' + n.statusCode : 'No response'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="badge ${n.status==='delivered'?'badge-green':n.status==='failed'?'badge-red':'badge-amber'}">${n.status}</span>
+          <span class="log-time">${new Date(n.createdAt).toLocaleTimeString()}</span>
+          ${n.status==='failed'?`<button class="btn btn-sm" style="background:rgba(99,102,241,0.15);color:#818CF8;" onclick="retryNotif('${n._id}')">Retry</button>`:''}
+        </div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function retryNotif(id) {
+  try {
+    await fetch(`${API}/notifications/${id}/retry`, { method:'POST', headers: headers() });
+    setTimeout(loadNotifications, 1500);
+  } catch {}
+}
+
+// Auto-login if token exists
+if (token) {
+  document.getElementById('apiKeyDisplay').textContent = (apiKey || '').slice(0, 20) + '...';
+  document.getElementById('authSection').style.display = 'none';
+  document.getElementById('dashSection').style.display = 'block';
+  loadDashboard();
+  loadNotifications();
+}
+
+// Auto-refresh every 10s
+setInterval(() => { if (token) { loadDashboard(); loadNotifications(); } }, 10000);
+</script>
+</body>
+</html>
